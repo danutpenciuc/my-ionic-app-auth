@@ -12,7 +12,7 @@ const MovieComp: React.FC<MovieExt> = ({ _id, name, rating, releaseDate, booked,
     <IonHeader>
       <IonRow>
         <IonCol>{name}</IonCol>
-        <IonCol>{releaseDate}</IonCol>
+        <IonCol>{new Date(releaseDate).toISOString().split('T')[0]}</IonCol>
         <IonCol>{rating}</IonCol>
         <IonCol>{booked ? 'Yes' : 'No'}</IonCol>
         <IonCol> 

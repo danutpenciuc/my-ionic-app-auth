@@ -12,3 +12,5 @@ Lab 1:
 - Lifting state up
 - React use context hook
 - Receive server-side notifications via web sockets
+- Service worker for cache
+- Fixed dateformat

@@ -57,11 +57,9 @@ const reducer: (state: MoviesState, action: ActionProps) => MoviesState =
       case SAVE_MOVIE_SUCCEEDED:
         const movies = [...(state.movies || [])];
         const movie = payload.movie;
-        const index = movies.findIndex(it => it.name === movie.name);
-        if (index === -1) {
-          movies.splice(0, 0, movie);
-        } else {
-          movies[index] = movie;
+        const index = movies.findIndex(it => it._id === movie._id);
+        if (movie?._id) {
+          index === -1 ? movies.splice(0, 0, movie) : movies[index] = movie;
         }
         return { ...state, movies, saving: false };
       case SAVE_MOVIE_FAILED:
@@ -73,8 +71,6 @@ const reducer: (state: MoviesState, action: ActionProps) => MoviesState =
         const movieId = payload.id;
         let isMovieDeleted = false;
         const index1 = movies1.findIndex(it => it._id == movieId);
-        log(movies1);
-        log(index1);
         if (index1 > -1) {
           movies1.splice(index1, 1);
           state.movies = movies1;

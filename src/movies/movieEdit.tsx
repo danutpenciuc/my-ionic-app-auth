@@ -14,11 +14,10 @@ import {
   IonToolbar
 } from '@ionic/react';
 import { getLogger } from '../core';
-import { Route, RouteComponentProps } from 'react-router';
+import { RouteComponentProps } from 'react-router';
 import { Movie } from './movie';
 import { MovieContext } from './movieProvider';
 import { AuthContext } from '../auth';
-import { validateRating } from '../utils/validator';
 
 const log = getLogger('MovieEdit');
 
@@ -31,7 +30,6 @@ interface MovieEdit extends RouteComponentProps<{
 }> {}
 
 const MovieEdit: React.FC<MovieEdit> = ({ history, match }) => {
-  let currentDate = new Date();
   const { token } = useContext(AuthContext);
   const { movies, saving, savingError, saveMovie } = useContext(MovieContext);
   const [name, setName] = useState('');
@@ -43,8 +41,6 @@ const MovieEdit: React.FC<MovieEdit> = ({ history, match }) => {
     log('useEffect');
     const routeId = match.params.id;
     const movie = movies?.find(it => it._id === routeId);
-    log(movies);
-    log(routeId);
     setMovie(movie);
     if (movie) {
       setName(movie.name);
@@ -54,9 +50,7 @@ const MovieEdit: React.FC<MovieEdit> = ({ history, match }) => {
     }
   }, [match.params.id, movies]);
   const handleSave = () => {
-    //console.log("MOVIEEEEE", movie, name, releaseDate, rating, booked);
-    const _id = match.params.id;
-    const editedMovie = { _id, name, releaseDate, rating, booked } as Movie;
+    const editedMovie = { ...movie, name, releaseDate, rating, booked } as Movie;
     saveMovie && saveMovie(token, editedMovie).then(() => history.goBack());
   };
   log('render');

@@ -1,16 +1,13 @@
 import React, { useContext } from 'react';
 import { RouteComponentProps } from 'react-router';
 import {
-  IonCol,
   IonContent,
   IonFab,
   IonFabButton,
-  IonGrid,
   IonHeader,
   IonIcon,
   IonList, IonLoading,
   IonPage,
-  IonRow,
   IonTitle,
   IonToolbar
 } from '@ionic/react';
@@ -26,11 +23,9 @@ const MovieList: React.FC<RouteComponentProps> = ({ history }) => {
   const { movies, fetching, fetchingError, deleting, deletingError, deleteMovieFn } = useContext(MovieContext);
   const { token } = useContext(AuthContext);
   const handleDelete = (id: string) => {
-    log("am ajuns aici")
-    deleteMovieFn && deleteMovieFn(token, id).then(() => history.push("/movies"));
+    deleteMovieFn && deleteMovieFn(token, id);
   };
   log('render');
-  console.log(movies);
   return (
     <IonPage>
       <IonHeader>

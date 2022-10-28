@@ -70,7 +70,7 @@ const reducer: (state: MoviesState, action: ActionProps) => MoviesState =
         const movies1 = [...(state.movies || [])];
         const movieId = payload.id;
         let isMovieDeleted = false;
-        const index1 = movies1.findIndex(it => it._id == movieId);
+        const index1 = movies1.findIndex(it => it._id === movieId);
         if (index1 > -1) {
           movies1.splice(index1, 1);
           state.movies = movies1;
@@ -121,7 +121,6 @@ export const MovieProvider: React.FC<MovieProviderProps> = ({ children }) => {
         log('fetchmovies started');
         dispatch({ type: FETCH_MOVIES_STARTED });
         const movies = await getMovies(token);
-        log("MOVIEEEEEEEEEEEEES ", movies);
         log('fetchmovies succeeded');
         if (!canceled) {
           dispatch({ type: FETCH_MOVIES_SUCCEEDED, payload: { movies } });

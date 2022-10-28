@@ -45,7 +45,7 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
             ...state,
             username: e.detail.value || ''
           })} />
-        { error && (username == undefined || (username?.length <=0)) ? <IonLabel>Username can't be empty!</IonLabel> : <></>}
+        { error && (!username || (username?.length <=0)) ? <IonLabel>Username can't be empty!</IonLabel> : <></>}
         <IonInput
           placeholder="Password"
           value={password}
@@ -53,7 +53,7 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
             ...state,
             password: e.detail.value || ''
           })}/>
-        { error && (password == undefined || (password?.length <=0)) ? <IonLabel>Password can't be empty!</IonLabel> : <></>}
+        { error && (!password|| (password?.length <=0)) ? <IonLabel>Password can't be empty!</IonLabel> : <></>}
         <IonLoading isOpen={isAuthenticating}/>
         {authenticationError && (
           <div>{authenticationError.message || 'Failed to authenticate'}</div>

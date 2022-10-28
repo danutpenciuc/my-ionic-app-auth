@@ -32,17 +32,17 @@ const log = getLogger('ws');
 export const newWebSocket = (token: string, onMessage: (data: MessageData) => void) => {
   const ws = new WebSocket(`ws://${baseUrl}`);
   ws.onopen = () => {
-    log('web socket onopen');
+    log('web socket onOpen');
     ws.send(JSON.stringify({ type: 'authorization', payload: { token } }));
   };
   ws.onclose = () => {
-    log('web socket onclose');
+    log('web socket onClose');
   };
   ws.onerror = error => {
-    log('web socket onerror', error);
+    log('web socket onError', error);
   };
   ws.onmessage = messageEvent => {
-    log('web socket onmessage');
+    log('web socket onMessage');
     onMessage(JSON.parse(messageEvent.data));
   };
   return () => {

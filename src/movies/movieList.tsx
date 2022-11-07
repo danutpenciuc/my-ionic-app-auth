@@ -15,16 +15,11 @@ import { add } from 'ionicons/icons';
 import { getLogger } from '../core';
 import { MovieContext } from './movieProvider';
 import MovieComp from './movieExt';
-import { AuthContext } from '../auth';
 
 const log = getLogger('movieList');
 
 const MovieList: React.FC<RouteComponentProps> = ({ history }) => {
-  const { movies, fetching, fetchingError, deleting, deletingError, deleteMovieFn } = useContext(MovieContext);
-  const { token } = useContext(AuthContext);
-  const handleDelete = (id: string) => {
-    deleteMovieFn && deleteMovieFn(token, id);
-  };
+  const { movies, fetching, fetchingError } = useContext(MovieContext);
   log('render');
   return (
     <IonPage>
@@ -36,20 +31,17 @@ const MovieList: React.FC<RouteComponentProps> = ({ history }) => {
       <IonContent>
         <IonLoading isOpen={fetching} message="Fetching movies"/>
         {movies && (
+          
           <IonList>
             {movies.map(({ _id, name, rating, releaseDate, booked }) =>
               <MovieComp key={_id} _id={_id} name={name} releaseDate={releaseDate} rating={rating} booked={booked} 
-              onEdit={id => history.push(`/Movie/${id}`)} onDelete={id => handleDelete(id)} />)}
+              onEdit={id => history.push(`/Movie/${id}`)} />)}
           </IonList>
         )}
         {fetchingError && (
           <div>{fetchingError.message || 'Failed to fetch movies'}</div>
         )}
-        <IonLoading isOpen={deleting} />
-        {deletingError && (
-          <div>{deletingError.message || 'Failed to delete movie'}</div>
-        )}
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+        <IonFab vertical="bottom" horizontal="start" slot="fixed">
           <IonFabButton onClick={() => history.push('/Movie')}>
             <IonIcon icon={add}/>
           </IonFabButton>

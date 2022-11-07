@@ -86,6 +86,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isAuthenticated: true,
           isAuthenticating: false,
         });
+        localStorage.setItem("token", JSON.stringify(token));
       } catch (error) {
         if (canceled) {
           return;

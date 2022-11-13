@@ -4,23 +4,23 @@ import { Movie } from './movie';
 
 const movieUrl = `http://${baseUrl}/api/movie`;
 
-export const getMovies: (token: string) => Promise<Movie[]> = token => {
-  return withLogs(axios.get(movieUrl, authConfig(token)), 'getMovies');
-}
+// export const getMovies: (token: string) => Promise<Movie[]> = token => {
+//   return withLogs(axios.get(movieUrl, authConfig(token)), 'getMovies');
+// }
 
-export const createMovie: (token: string, movie: Movie) => Promise<Movie[]> = (token, movie) => {
-  log(movie, "I am in create movie method");
-  return withLogs(axios.post(movieUrl, movie, authConfig(token)), 'createMovie');
-}
+// export const createMovie: (token: string, movie: Movie) => Promise<Movie[]> = (token, movie) => {
+//   log(movie, "I am in create movie method");
+//   return withLogs(axios.post(movieUrl, movie, authConfig(token)), 'createMovie');
+// }
 
-export const updateMovie: (token: string, movie: Movie) => Promise<Movie[]> = (token, movie) => {
-  log(movie, "I am in save movie method");
-  return withLogs(axios.put(`${movieUrl}/${movie._id}`, movie, authConfig(token)), 'saveMovie');
-}
+// export const updateMovie: (token: string, movie: Movie) => Promise<Movie[]> = (token, movie) => {
+//   log(movie, "I am in save movie method");
+//   return withLogs(axios.put(`${movieUrl}/${movie._id}`, movie, authConfig(token)), 'saveMovie');
+// }
 
-export const deleteMovie: (token: string, _id: string) => Promise<boolean> = (token, _id) => {
-  return withLogs(axios.delete(`${movieUrl}/${_id}`, authConfig(token)), 'deleteMovie');
-}
+// export const deleteMovie: (token: string, _id: string) => Promise<boolean> = (token, _id) => {
+//   return withLogs(axios.delete(`${movieUrl}/${_id}`, authConfig(token)), 'deleteMovie');
+// }
 
 interface MessageData {
   type: string;

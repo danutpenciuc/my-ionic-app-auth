@@ -2,13 +2,16 @@ import React, { useCallback, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { getLogger } from '../core';
 import { Movie } from './movie';
-import { createMovie, deleteMovie, getMovies, newWebSocket, updateMovie } from './movieApi';
+import {  newWebSocket} from './movieApi'; 
 import { AuthContext } from '../auth';
+import { useAddMoviesMutation, useDeleteMovieMutation, useGetMoviesQuery, useUpdateMoviesMutation } from '../redux/slices';
+import { add } from 'ionicons/icons';
+import { MovieExt } from './movieExt';
 
 const log = getLogger('movieProvider');
 
-type SaveMovieFn = (token: string, movie: Movie) => Promise<any>;
-type DeleteMovieFn = (token: string, id: string) => Promise<any>;
+type SaveMovieFn = (movie: Movie) => Promise<any>;
+type DeleteMovieFn = (id: string) => Promise<any>;
 
 export interface MoviesState {
   movies?: Movie[],
@@ -22,53 +25,53 @@ export interface MoviesState {
   deleteMovieFn?: DeleteMovieFn
 }
 
-interface ActionProps {
+export interface ActionProps {
   type: string,
   payload?: any,
 }
 
-const initialState: MoviesState = {
+export const initialState: MoviesState = {
   fetching: false,
   saving: false,
   deleting: false
 };
 
-const FETCH_MOVIES_STARTED = 'FETCH_MOVIES_STARTED';
-const FETCH_MOVIES_SUCCEEDED = 'FETCH_MOVIES_SUCCEEDED';
-const FETCH_MOVIES_FAILED = 'FETCH_MOVIES_FAILED';
-const SAVE_MOVIE_STARTED = 'SAVE_MOVIE_STARTED';
-const SAVE_MOVIE_SUCCEEDED = 'SAVE_MOVIE_SUCCEEDED';
-const SAVE_MOVIE_FAILED = 'SAVE_MOVIE_FAILED';
-const DELETE_MOVIE_STARTED = 'DELETE_MOVIE_STARTED';
-const DELETE_MOVIE_SUCCEEDED = 'DELETE_MOVIE_SUCCEEDED';
-const DELETE_MOVIE_FAILED = 'DELETE_MOVIE_FAILED';
+export const FETCH_MOVIES_STARTED = 'FETCH_MOVIES_STARTED';
+export const FETCH_MOVIES_SUCCEEDED = 'FETCH_MOVIES_SUCCEEDED';
+export const FETCH_MOVIES_FAILED = 'FETCH_MOVIES_FAILED';
+export const SAVE_MOVIE_STARTED = 'SAVE_MOVIE_STARTED';
+export const SAVE_MOVIE_SUCCEEDED = 'SAVE_MOVIE_SUCCEEDED';
+export const SAVE_MOVIE_FAILED = 'SAVE_MOVIE_FAILED';
+export const DELETE_MOVIE_STARTED = 'DELETE_MOVIE_STARTED';
+export const DELETE_MOVIE_SUCCEEDED = 'DELETE_MOVIE_SUCCEEDED';
+export const DELETE_MOVIE_FAILED = 'DELETE_MOVIE_FAILED';
 
-const reducer: (state: MoviesState, action: ActionProps) => MoviesState =
-  (state, { type, payload }) => {
-    switch (type) {
+export const movieReducer: (state: MoviesState, action: ActionProps) => MoviesState =
+  (state, action) => {
+    switch (action.type) {
       case FETCH_MOVIES_STARTED:
         return { ...state, fetching: true, fetchingError: null };
       case FETCH_MOVIES_SUCCEEDED:
-        return { ...state, movies: payload.movies, fetching: false };
+        return { ...state, movies: action.payload.movies, fetching: false };
       case FETCH_MOVIES_FAILED:
-        return { ...state, fetchingError: payload.error, fetching: false };
+        return { ...state, fetchingError: action.payload.error, fetching: false };
       case SAVE_MOVIE_STARTED:
         return { ...state, savingError: null, saving: true };
       case SAVE_MOVIE_SUCCEEDED:
         const movies = [...(state.movies || [])];
-        const movie = payload.movie;
+        const movie = action.payload.movie;
         const index = movies.findIndex(it => it._id === movie._id);
         if (movie?._id) {
           index === -1 ? movies.splice(0, 0, movie) : movies[index] = movie;
         }
         return { ...state, movies, saving: false };
       case SAVE_MOVIE_FAILED:
-        return { ...state, savingError: payload.error, saving: false };
+        return { ...state, savingError: action.payload.error, saving: false };
       case DELETE_MOVIE_STARTED:
         return { ...state, deletingError: null, deleting: true}
       case DELETE_MOVIE_SUCCEEDED:
         const movies1 = [...(state.movies || [])];
-        const movieId = payload.id;
+        const movieId = action.payload.id;
         let isMovieDeleted = false;
         const index1 = movies1.findIndex(it => it._id === movieId);
         if (index1 > -1) {
@@ -78,7 +81,7 @@ const reducer: (state: MoviesState, action: ActionProps) => MoviesState =
         }
         return { ...state, isMovieDeleted, deleting: false };
       case DELETE_MOVIE_FAILED:
-        return { ...state, deletingError: payload.error, deleting: false };
+        return { ...state, deletingError: action.payload.error, deleting: false };
       default:
         return state;
     }
@@ -92,12 +95,21 @@ interface MovieProviderProps {
 
 export const MovieProvider: React.FC<MovieProviderProps> = ({ children }) => {
   const { token } = useContext(AuthContext);
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { movies, fetching, fetchingError, saving, savingError, deleting, deletingError } = state;
-  useEffect(getmoviesEffect, [token]);
+  const [state, dispatch] = useReducer(movieReducer, initialState);
+  const { fetching, fetchingError, saving, savingError, deleting, deletingError } = state;
+
+  const [ addMovie ] = useAddMoviesMutation();
+  const [ updateMovie ] = useUpdateMoviesMutation();
+  const [ deleteMovie ] = useDeleteMovieMutation();
+
+  const {
+    data: movies,
+} = useGetMoviesQuery();
+
+ // useEffect(getmoviesEffect, [token]);
   useEffect(wsEffect, [token]);
-  const saveMovie = useCallback<SaveMovieFn>(saveMovieCallback, [token]);
-  const deleteMovieFn = useCallback<DeleteMovieFn>(deleteMovieCallback, [token]);
+  const saveMovie = useCallback<SaveMovieFn>(saveMovieCallback, []);
+  const deleteMovieFn = useCallback<DeleteMovieFn>(deleteMovieCallback, []);
   const value = { movies, fetching, fetchingError, saving, savingError, deleting, deletingError, saveMovie, deleteMovieFn };
   log('returns');
   return (
@@ -106,37 +118,33 @@ export const MovieProvider: React.FC<MovieProviderProps> = ({ children }) => {
     </MovieContext.Provider>
   );
 
-  function getmoviesEffect() {
-    let canceled = false;
-    fetchmovies();
-    return () => {
-      canceled = true;
-    }
+  // function getmoviesEffect() {
+  //   let canceled = false;
+  //   fetchmovies();
+  //   return () => {
+  //     canceled = true;
+  //   }
 
-    async function fetchmovies() {
-      if (!token?.trim()) {
-        return;
-      }
-      try {
-        log('fetchmovies started');
-        dispatch({ type: FETCH_MOVIES_STARTED });
-        const movies = await getMovies(token);
-        log('fetchmovies succeeded');
-        if (!canceled) {
-          dispatch({ type: FETCH_MOVIES_SUCCEEDED, payload: { movies } });
-        }
-      } catch (error) {
-        log('fetchmovies failed');
-        dispatch({ type: FETCH_MOVIES_FAILED, payload: { error } });
-      }
-    }
-  }
+  //   async function fetchmovies() {
+  //     try {
+  //       log('fetchmovies started');
+  //       dispatch({ type: FETCH_MOVIES_STARTED });
+  //       log('fetchmovies succeeded');
+  //       if (!canceled) {
+  //         dispatch({ type: FETCH_MOVIES_SUCCEEDED, payload: { movies } });
+  //       }
+  //     } catch (error) {
+  //       log('fetchmovies failed');
+  //       dispatch({ type: FETCH_MOVIES_FAILED, payload: { error } });
+  //     }
+  //   }
+  // }
 
-  async function saveMovieCallback(token: string, movie: Movie) {
+  async function saveMovieCallback(movie: Movie) {
     try {
       log('saveMovie started');
       dispatch({ type: SAVE_MOVIE_STARTED });
-      const savedmovie = await (movie._id ? updateMovie(token, movie) : createMovie(token, movie));
+      const savedmovie = await (movie._id ? updateMovie(movie as MovieExt) : addMovie(movie as MovieExt));
       log('saveMovie succeeded');
       dispatch({ type: SAVE_MOVIE_SUCCEEDED, payload: { movie: savedmovie } });
     } catch (error) {
@@ -145,11 +153,11 @@ export const MovieProvider: React.FC<MovieProviderProps> = ({ children }) => {
     }
   }
 
-  async function deleteMovieCallback(token: string, id: string) {
+  async function deleteMovieCallback(id: string) {
     try {
       log('deleteMovie started');
       dispatch({ type: DELETE_MOVIE_STARTED });
-      await deleteMovie(token, id);
+      await deleteMovie(id);
       log('delete movie succeeded');
       dispatch({ type: DELETE_MOVIE_SUCCEEDED, payload: { id: id } });
     } catch (error) {

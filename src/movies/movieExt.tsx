@@ -1,5 +1,5 @@
 import React from 'react';
-import { IonButton, IonCol, IonHeader, IonRow } from '@ionic/react';
+import { IonButton, IonLabel, IonHeader, IonItem, IonRow } from '@ionic/react';
 import { Movie } from './movie';
 
 export interface MovieExt extends Movie {
@@ -8,17 +8,15 @@ export interface MovieExt extends Movie {
 
 const MovieComp: React.FC<MovieExt> = ({ _id, name, rating, releaseDate, booked, onEdit }) => {
   return (
-    <IonHeader>
-      <IonRow>
-        <IonCol>{name}</IonCol>
-        <IonCol>{new Date(releaseDate).toISOString().split('T')[0]}</IonCol>
-        <IonCol>{rating}</IonCol>
-        <IonCol>{booked ? 'Booked' : 'Not booked'}</IonCol>
-        <IonCol> 
-          <IonButton fill='outline' onClick={() => onEdit(_id, name, rating, releaseDate, booked)}>View</IonButton>
-        </IonCol>
-      </IonRow>
-    </IonHeader>
+    <div style={{"height": "300px"}}>
+      <IonItem>
+        <IonLabel>{name}</IonLabel>
+        <IonLabel>{new Date(releaseDate).toISOString().split('T')[0]}</IonLabel>
+        <IonLabel>{rating}</IonLabel>
+        <IonLabel>{booked ? 'Booked' : 'Not booked'}</IonLabel>
+        <IonButton fill='outline' onClick={() => onEdit(_id, name, rating, releaseDate, booked)}>View</IonButton>
+      </IonItem>
+    </div>
   );
 };
 

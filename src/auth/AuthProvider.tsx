@@ -6,24 +6,28 @@ import { login as loginApi } from './authApi';
 const log = getLogger('AuthProvider');
 
 type LoginFn = (username?: string, password?: string) => void;
+type LogoutFn = () => void;
 
 export interface AuthState {
   authenticationError: Error | null;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
   login?: LoginFn;
+  logout?: LogoutFn;
   pendingAuthentication?: boolean;
   username?: string;
   password?: string;
   token: string;
 }
 
+const jsonLocalStorageToken = localStorage.getItem('token');
+const localStorageToken : string = jsonLocalStorageToken ? JSON.parse(jsonLocalStorageToken) : '';
 const initialState: AuthState = {
-  isAuthenticated: false,
+  isAuthenticated: localStorageToken.length > 0,
   isAuthenticating: false,
   authenticationError: null,
   pendingAuthentication: false,
-  token: '',
+  token: localStorageToken
 };
 
 export const AuthContext = React.createContext<AuthState>(initialState);
@@ -35,9 +39,11 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, setState] = useState<AuthState>(initialState);
   const { isAuthenticated, isAuthenticating, authenticationError, pendingAuthentication, token } = state;
+
   const login = useCallback<LoginFn>(loginCallback, []);
+  const logout = useCallback<LogoutFn>(logoutCallback, []);
   useEffect(authenticationEffect, [pendingAuthentication]);
-  const value = { isAuthenticated, login, isAuthenticating, authenticationError, token };
+  const value = { isAuthenticated, login, logout, isAuthenticating, authenticationError, token };
   log('render');
   return (
     <AuthContext.Provider value={value}>
@@ -55,6 +61,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   }
 
+  function logoutCallback(): void {
+    log('logout');
+    setState({
+      ...state,
+      pendingAuthentication: false,
+      isAuthenticated: false,
+    });
+    localStorage.removeItem('token');
+  }
+ 
   function authenticationEffect() {
     let canceled = false;
     authenticate();
@@ -86,7 +102,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isAuthenticated: true,
           isAuthenticating: false,
         });
-        localStorage.setItem("token", JSON.stringify(token));
+        localStorage.setItem('token', JSON.stringify(token));
       } catch (error) {
         if (canceled) {
           return;
@@ -94,7 +110,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         log('authenticate failed');
         setState({
           ...state,
-          authenticationError: error,
+          authenticationError: error as Error,
           pendingAuthentication: false,
           isAuthenticating: false,
         });

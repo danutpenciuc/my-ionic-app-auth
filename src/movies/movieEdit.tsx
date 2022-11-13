@@ -32,7 +32,6 @@ interface MovieEdit extends RouteComponentProps<{
 }> {}
 
 const MovieEdit: React.FC<MovieEdit> = ({ history, match }) => {
-  const { token } = useContext(AuthContext);
   const { movies, saving, savingError, saveMovie, deleting, deletingError, deleteMovieFn } = useContext(MovieContext);
   const [name, setName] = useState('');
   const [releaseDate, setReleaseDate] = useState(new Date());
@@ -55,12 +54,12 @@ const MovieEdit: React.FC<MovieEdit> = ({ history, match }) => {
 
   const handleSave = () => {
     const editedMovie = { ...movie, name, releaseDate, rating, booked } as Movie;
-    saveMovie && saveMovie(token, editedMovie).then(() => history.goBack());
+    saveMovie && saveMovie(editedMovie).then(() => history.goBack());
   };
 
   const handleDelete = () => {
     const id = movie?._id || '';
-    deleteMovieFn && deleteMovieFn(token, id).then(() => history.goBack());
+    deleteMovieFn && deleteMovieFn(id).then(() => history.goBack());
   };
 
   log('render');

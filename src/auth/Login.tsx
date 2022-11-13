@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { RouteComponentProps } from 'react-router';
+import { RouteComponentProps, useParams } from 'react-router';
 import { IonButton, IonContent, IonHeader, IonInput, IonLabel, IonLoading, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import { AuthContext } from './AuthProvider';
 import { getLogger } from '../core';
@@ -17,20 +17,24 @@ export const Login: React.FC<RouteComponentProps> = ({ history }) => {
   const [state, setState] = useState<LoginState>({});
   const [error, setError] = useState(false);
   const { username, password } = state;
-
+  
   const handleLogin = () => {
     log('handleLogin...');
     if(username?.length === 0 || password?.length === 0) {
       setError(true);
       return;
     }
+    
     login?.(username, password);
   };
-  log('render');
+
+  log('render'); 
+  
   if (isAuthenticated) {
     return <Redirect to={{ pathname: '/' }} />
   }
-  return (
+
+  return ( 
     <IonPage>
       <IonHeader>
         <IonToolbar>
